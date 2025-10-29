@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Leitor de Receita - MVP</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width:800px; margin:20px auto; padding:10px; }
+    h1 { color:#5a2ca0; }
+    .preview { max-width:100%; height:auto; border:1px solid #ddd; margin-bottom:10px; }
+    .box { padding:10px; border-radius:8px; background:#fafafa; margin-bottom:12px; }
+    .warn { color:#a00; font-weight:bold; }
+    .chip { display:inline-block; padding:6px 10px; background:#eee; margin:4px; border-radius:14px; }
+  </style>
+</head>
+<body>
+  <h1>Leitor de Receita (MVP)</h1>
+  <p class="warn">⚠️ Aviso: este site apenas lê o texto da imagem. Não substitui orientação médica!</p>
+
+  <input type="file" id="fileInput" accept="image/*" />
+  <div id="imgContainer"></div>
+
+  <div class="box">
+    <h3>Texto extraído:</h3>
+    <pre id="ocrText">Nenhuma imagem carregada.</pre>
+  </div>
+
+  <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const imgContainer = document.getElementById('imgContainer');
+    const ocrText = document.getElementById('ocrText');
+
+    fileInput.addEventListener('change', async (ev) => {
+      const f = ev.target.files[0];
+      if (!f) return;
+      const url = URL.createObjectURL(f);
+      imgContainer.innerHTML = `<img src="${url}" class="preview" />`;
+      ocrText.textContent = 'Processando imagem... aguarde.';
+
+      try {
+        const { data: { text } } = await Tesseract.recognize(url, 'por');
+        ocrText.textContent = text || 'Não foi possível ler o texto.';
+      } catch(err) {
+        ocrText.textContent = 'Erro ao processar: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
